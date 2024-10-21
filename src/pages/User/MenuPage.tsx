@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import TopBar from '../components/TopBar';
-import MenuItem from '../components/MenuItem';
-import NotFound from '../components/NotFound';
-import FixedCartBar from '../components/FixedCartBar';
+import TopBar from '../../components/TopBar';
+import MenuItem from '../../components/MenuItem';
+import NotFound from '../../components/NotFound';
+import FixedCartBar from '../../components/FixedCartBar';
 
 const menuCategories = [
   { id: 'all', name: 'All' },

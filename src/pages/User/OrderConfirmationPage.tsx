@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useCart } from '../hooks/useCart';
+import { useCart } from '../../hooks/useCart';
 
 const OrderConfirmationPage: React.FC = () => {
   const { tableNumber } = useParams<{ tableNumber: string }>();
