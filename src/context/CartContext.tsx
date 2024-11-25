@@ -17,6 +17,7 @@ interface CartContextType {
   getTotalPrice: () => number;
   getTotalQuantity: () => number;
   getItemQuantity: (id: string) => number;
+  submitOrder: (tableNumber: string) => Promise<unknown>;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -65,6 +66,38 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return item ? item.quantity : 0;
   };
 
+
+  const submitOrder = async (tableNumber: string) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tableId: tableNumber,
+          items: cartItems.map(item => ({
+            menuItemId: item.id,
+            quantity: item.quantity
+          }))
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        throw new Error(`Server responded with ${response.status}: ${errorData.message || 'Unknown error'}`);
+      }
+
+      const orderData = await response.json();
+      clearCart(); // 提交订单后清空购物车
+      return orderData; // 返回订单数据
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      throw error;
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -76,6 +109,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         getTotalPrice,
         getTotalQuantity,
         getItemQuantity,
+        submitOrder
       }}
     >
       {children}

@@ -1,39 +1,91 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo,useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import TopBar from '../../components/TopBar';
 import MenuItem from '../../components/MenuItem';
 import NotFound from '../../components/NotFound';
 import FixedCartBar from '../../components/FixedCartBar';
 
-const menuCategories = [
-  { id: 'all', name: 'All' },
-  { id: 'rice', name: 'Rice' },
-  { id: 'noodles', name: 'Noodles' },
-  { id: 'appetizers', name: 'Appetizers' },
-  { id: 'drinks', name: 'Drinks' },
-];
+// const menuCategories = [
+//   { id: 'all', name: 'All' },
+//   { id: 'rice', name: 'Rice' },
+//   { id: 'noodles', name: 'Noodles' },
+//   { id: 'appetizers', name: 'Appetizers' },
+//   { id: 'drinks', name: 'Drinks' },
+// ];
 
-const menuItems = [
-  { id: '1', name: 'Fried Rice', description: 'Classic Chinese fried rice', price: 10.99, image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&q=80&w=1000', category: 'rice' },
-  { id: '2', name: 'Chow Mein', description: 'Stir-fried noodles with vegetables', price: 11.99, image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&q=80&w=1000', category: 'noodles' },
-  { id: '3', name: 'Spring Rolls', description: 'Crispy vegetable spring rolls', price: 6.99, image: 'https://images.unsplash.com/photo-1548811256-1627d99e7a4b?auto=format&fit=crop&q=80&w=1000', category: 'appetizers' },
-  { id: '4', name: 'Bubble Tea', description: 'Milk tea with tapioca pearls', price: 4.99, image: 'https://images.unsplash.com/photo-1558857563-c0c5ee9b0e5a?auto=format&fit=crop&q=80&w=1000', category: 'drinks' },
-];
+// const menuItems = [
+//   { id: '1', name: 'Fried Rice', description: 'Classic Chinese fried rice', price: 10.99, image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&q=80&w=1000', category: 'rice' },
+//   { id: '2', name: 'Chow Mein', description: 'Stir-fried noodles with vegetables', price: 11.99, image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&q=80&w=1000', category: 'noodles' },
+//   { id: '3', name: 'Spring Rolls', description: 'Crispy vegetable spring rolls', price: 6.99, image: 'https://images.unsplash.com/photo-1548811256-1627d99e7a4b?auto=format&fit=crop&q=80&w=1000', category: 'appetizers' },
+//   { id: '4', name: 'Bubble Tea', description: 'Milk tea with tapioca pearls', price: 4.99, image: 'https://images.unsplash.com/photo-1558857563-c0c5ee9b0e5a?auto=format&fit=crop&q=80&w=1000', category: 'drinks' },
+// ];
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+}
+
+interface MenuCategory {
+  id: string;
+  name: string;
+}
 
 const MenuPage: React.FC = () => {
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [menuCategories, setMenuCategories] = useState<MenuCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const { tableNumber } = useParams<{ tableNumber: string }>();
   const navigate = useNavigate();
 
+
+  
+  useEffect(() => {
+    const fetchMenuData = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/menu`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch menu data');
+        }
+        const data = await response.json();
+        setMenuItems(data.items);
+        setMenuCategories([{ id: 'all', name: 'All' }, ...data.categories]);
+        // console.log(data);
+      } catch (err) {
+        setError('Error fetching menu data. Please try again later.');
+        console.error('Error fetching menu data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenuData();
+  }, []);
+
   const filteredItems = useMemo(() => {
+    if (!Array.isArray(menuItems)) return [];
     return menuItems.filter((item) => {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             item.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, activeCategory]);
+  }, [menuItems,searchTerm, activeCategory]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
 
   const handleSearch = (term: string) => {
     setSearchTerm(term);

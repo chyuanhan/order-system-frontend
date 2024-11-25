@@ -15,7 +15,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ id, name, description, price, image
   const quantity = getItemQuantity(id);
 
   const handleAddToCart = () => {
-    addToCart({ id, name, price, quantity: 1,image });
+    addToCart({ id, name, price, quantity: 1, image });
   };
 
   const handleDecreaseQuantity = () => {
@@ -24,7 +24,7 @@ const MenuItem: React.FC<MenuItemProps> = ({ id, name, description, price, image
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <img src={image} alt={name} className="w-full h-48 object-cover" />
+      <img src={`${import.meta.env.VITE_BACKEND_ASSET_URL}/${image}`} alt={name} className="w-full h-48 object-cover" />
       <div className="p-4">
         <h3 className="text-lg font-semibold mb-2">{name}</h3>
         <p className="text-gray-600 mb-2">{description}</p>

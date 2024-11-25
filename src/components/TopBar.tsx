@@ -4,7 +4,7 @@ import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 interface TopBarProps {
-  onSearch: (term: string) => void;
+  onSearch?: (term: string) => void;
 }
 
 const TopBar: React.FC<TopBarProps> = ({ onSearch }) => {
@@ -22,7 +22,9 @@ const TopBar: React.FC<TopBarProps> = ({ onSearch }) => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    onSearch(e.target.value);
+    if (onSearch) {
+      onSearch(e.target.value);
+    }
   };
 
   const toggleSearch = () => {
@@ -59,7 +61,7 @@ const TopBar: React.FC<TopBarProps> = ({ onSearch }) => {
           location.pathname === '/admin' ? 'border-indigo-500 text-gray-900' : ''
         }`}
       >
-        Dashboard
+        Orders
       </Link>
       <Link
         to="/admin/menu"
@@ -68,14 +70,6 @@ const TopBar: React.FC<TopBarProps> = ({ onSearch }) => {
         }`}
       >
         Menu Management
-      </Link>
-      <Link
-        to="/admin/tables"
-        className={`border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-          location.pathname === '/admin/tables' ? 'border-indigo-500 text-gray-900' : ''
-        }`}
-      >
-        Table Management
       </Link>
       <Link
         to="/admin/sales"
@@ -104,7 +98,7 @@ const TopBar: React.FC<TopBarProps> = ({ onSearch }) => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <img className="h-8 w-auto" src="/logo.png" alt="Restaurant Logo" />
+              <img className="h-16 w-auto" src="/logo.jpg" alt="Restaurant Logo" />
             </div>
             {isAuthenticated && (
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

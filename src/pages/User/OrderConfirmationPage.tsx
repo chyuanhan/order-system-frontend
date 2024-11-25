@@ -1,45 +1,69 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useCart } from '../../hooks/useCart';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+
+interface MenuItem {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+}
+
+interface OrderItem {
+  menuItem: MenuItem;
+  quantity: number;
+  imageUrl: string;
+  name: string;
+  _id: string;
+}
+
+interface OrderData {
+  _id: string;
+  tableId: string;
+  items: OrderItem[];
+  totalAmount: number;
+}
 
 const OrderConfirmationPage: React.FC = () => {
   const { tableNumber } = useParams<{ tableNumber: string }>();
-  const { cartItems, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
-  const orderNumber = Math.floor(100000 + Math.random() * 900000);
+  const location = useLocation();
+  const orderData = location.state?.orderData as OrderData;
 
   const handleBackToMenu = () => {
-    clearCart(); // 清空购物车
-    navigate(`/table/${tableNumber}`); // 导航回菜单页面
+    navigate(`/table/${tableNumber}`);
   };
+
+  if (!orderData) {
+    return <div>No order data available. Please try again.</div>;
+  }
+
+  const shortOrderId = orderData._id.slice(-6);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Order Placed Successfully!</h1>
-      <p className="text-xl mb-4">Table Number: {tableNumber}</p>
-      <p className="text-xl mb-4">Order Number: {orderNumber}</p>
+      <p className="text-xl mb-4">Table Number: {orderData.tableId}</p>
+      <p className="text-xl mb-4">Order Number: {shortOrderId}</p>
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        {cartItems.length > 0 ? (
-          cartItems.map((item) => (
-            <div key={item.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-              <div className="flex items-center">
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  className="w-12 h-12 object-cover rounded-md mr-4"
-                />
-                <span>{item.name} x {item.quantity}</span>
-              </div>
-              <span>${(item.price * item.quantity).toFixed(2)}</span>
+        {orderData.items.map((item) => (
+          <div key={item._id} className="flex items-center justify-between py-2 border-b last:border-b-0">
+            <div className="flex items-center">
+              <img 
+                src={item.imageUrl} 
+                alt={item.name} 
+                className="w-12 h-12 object-cover rounded-md mr-4"
+              />
+              <span>{item.menuItem.name} x {item.quantity}</span>
             </div>
-          ))
-        ) : (
-          <p>Order is empty.</p>
-        )}
+            <span>${(item.menuItem.price * item.quantity).toFixed(2)}</span>
+          </div>
+        ))}
         <div className="border-t pt-4 mt-4">
           <div className="flex justify-between font-bold">
             <span>Total:</span>
-            <span>${getTotalPrice().toFixed(2)}</span>
+            <span>${orderData.totalAmount.toFixed(2)}</span>
           </div>
         </div>
       </div>

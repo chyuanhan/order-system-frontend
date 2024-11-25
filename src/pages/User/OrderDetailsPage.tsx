@@ -1,12 +1,22 @@
 import React from 'react';
-import { Link, useNavigate,useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../../hooks/useCart';
 import { Minus, Plus, Trash2, ArrowLeft } from 'lucide-react';
 
 const OrderDetailsPage: React.FC = () => {
-  const { cartItems, updateQuantity, removeFromCart, getTotalPrice } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, submitOrder } = useCart();
   const navigate = useNavigate();
   const { tableNumber } = useParams<{ tableNumber: string }>();
+
+  const handlePlaceOrder = async () => {
+    try {
+      const orderData = await submitOrder(tableNumber!);
+      navigate(`/table/${tableNumber}/order-confirmation`, { state: { orderData } });
+    } catch (error) {
+      console.error('Failed to place order:', error);
+      // 这里可以添加错误处理，比如显示一个错误消息给用户
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -66,12 +76,12 @@ const OrderDetailsPage: React.FC = () => {
             <span className="text-2xl font-bold">Total:</span>
             <span className="text-2xl font-bold">${getTotalPrice().toFixed(2)}</span>
           </div>
-          <Link
-            to={`/table/${tableNumber}/order-confirmation`}
+          <button
+            onClick={handlePlaceOrder}
             className="block w-full bg-blue-500 text-white text-center py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
           >
             Place Order
-          </Link>
+          </button>
         </>
       )}
     </div>
